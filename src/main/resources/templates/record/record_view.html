@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Блог</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+  <style>
+    h1, h4 {color: cadetblue; text-shadow: 1px 1px 2px black;}
+    p {font-weight: normal}
+    #add {margin-top: 10px;}
+  </style>
+</head>
+<body>
+
+<div class="bg-image"
+     style="background: linear-gradient( rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0.5) ), url('https://i.pinimg.com/originals/93/09/e0/9309e0176514734cf5e00891ec3dad9d.jpg');
+     background-repeat: no-repeat;
+     background-size: cover;
+     background-attachment: fixed;
+     background-position: top;; height: 100vh; overflow: auto">
+    <header>
+        <span style="float: left; margin: 20px 20px 20px 20px">
+        <a href="/">
+            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplite="off">
+                К задачам
+            </button>
+        </a>
+        </span>
+    <span style="float: right; margin: 20px 20px 20px 20px">
+        <a href="/logout">
+            <button type="button" class="btn btn-danger" data-togge="button" aria-pressed="false" autocomplete="off">
+                Выйти
+            </button>
+        </a>
+        </span>
+  </header>
+  <blockquote class="blockquote text-center">
+    <h1 style="display: inline; margin-left: 80px">Записи</h1>
+  </blockquote>
+
+
+  <section>
+      <div>
+          <div class="col-md-8 offset-md-4">
+              <h4>Поиск записей по любому критерию:</h4>
+              <form th:action="@{/}">
+                  <input type="text" name="keyword" id="keyword" size="70" th:value="${keyword}" required/>
+                  <input type="submit" class="btn btn-success btn-sm" value="Поиск"/>
+                  <input type="button" class="btn btn-warning btn-sm" value="Очистить" id="btnClear" onclick="clearSearch()"/>
+              </form>
+          </div>
+      </div>
+      <blockquote class="blockquote text-center">
+          <a class="btn btn-success" id="add" onclick="addModal()">Добавить запись</a>
+      </blockquote>
+       <div>
+            <span style="margin: 20px 20px 20px 20px">
+
+                <span style="float: left; background-color: whitesmoke; margin: 20px 200px 20px 200px; border-radius: 25px">
+                    <table>
+                        <tr th:each="record: ${listRecord}">
+                            <th>
+                                <img th:src="${record.image}" alt="no image"  width="250" class="scale" />
+                            </th>
+                            <th>
+                                <div style="margin: 20px 20px 20px 20px" >
+                                    <p th:text="${record.id}" hidden="hidden">ID отсутствует</p>
+                                    <p th:text="${record.title}" style="font-weight: bold">Название отсутствует</p>
+                                    <p th:text="${record.postdate}">Дата загрузки отсутствует</p>
+                                    <p th:text="${record.content}">Содержимое отсутствует</p>
+                                    <p th:text="${record.image}" hidden="hidden">Ссылка на изображение отсутсвует</p>
+                                    <a class="btn btn-info" id="edit" onclick="editModal(event)">Редактировать</a>
+                                    <button type="button"
+                                            class="btn btn-danger"
+                                            onclick="showDeleteConfirmationModal(event)">
+                        Удалить
+                    </button>
+                              </div>
+                            </th>
+                        </tr>
+                        </table>
+                </span>
+
+
+            </span>
+       </div>
+  </section>
+</div>
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Добавить запись</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="addForm">
+                <div class="modal-body">
+                    <table>
+                        <tr>
+                            <td>Название:</td>
+                            <td><input id="addTitle" name="title"></td>
+                        </tr>
+                        <tr>
+                            <td>Дата:</td>
+                            <td><input id="addDate" name="content" type="date"></td>
+                        </tr>
+                        <tr>
+                            <td>Текст:</td>
+                            <td><input id="addText" name="export_city"></td>
+                        </tr>
+                        <tr>
+                            <td>Ссылка на картинку:</td>
+                            <td><input id="addPicture" name="export_date" type="url"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Редактировать запись</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editForm">
+                <div class="modal-body">
+                    <table>
+                        <tr>
+                            <td>ID:</td>
+                            <td><input id="editId" name="id" hidden="hidden"></td>
+                        </tr>
+                        <tr>
+                            <td>Название:</td>
+                            <td><input id="editTitle" name="title"></td>
+                        </tr>
+                        <tr>
+                            <td>Дата:</td>
+                            <td><input id="editDate" name="content"></td>
+                        </tr>
+                        <tr>
+                            <td>Текст:</td>
+                            <td><input id="editText" name="export_city"></td>
+                        </tr>
+                        <tr>
+                            <td>Ссылка на картинку:</td>
+                            <td><input id="editPicture" name="export_date"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Удаление записи</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Вы действительно хотите удалить эту запись?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Выйти</button>
+                <button type="button" class="btn btn-danger" onclick="deleteRecord()">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Функция для отображения модального окна с данными для редактирования
+    function editModal(event) {
+        const parentRow = event.target.closest('div');
+        const cells = parentRow.children;
+
+        document.getElementById("editId").value = cells[0].textContent;
+        document.getElementById("editTitle").value = cells[1].textContent;
+        document.getElementById("editDate").value = cells[2].textContent;
+        document.getElementById("editText").value = cells[3].textContent;
+        document.getElementById("editPicture").value = cells[4].textContent;
+        // Установите значения полей в модальном окне
+        // Отображение модального окна
+        $('#editModal').modal('show');
+    }
+    // Обработчик события отправки формы редактирования
+    document.getElementById("editForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        // Получите значения полей формы
+        var id = document.getElementById("editId").value;
+        var title = document.getElementById("editTitle").value;
+        var date = document.getElementById("editDate").value;
+        var text = document.getElementById("editText").value;
+        var picture = document.getElementById("editPicture").value;
+        // Получите значения остальных полей формы
+        // Отправить данные на сервер с помощью AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/record/save", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Закрыть модальное окно и обновить таблицу с новыми данными
+                $('#editModal').modal('hide');
+                location.reload();
+            }
+        };
+        xhr.send(`id=${id}&title=${title}&postdate=${date}&content=${text}&image=${picture}`);
+    });
+</script>
+<script>
+    // Функция для отображения модального окна с данными для редактирования
+    function addModal() {
+        // Установите значения полей в модальном окне
+        // Отображение модального окна
+        $('#addModal').modal('show');
+    }
+    // Обработчик события отправки формы редактирования
+    document.getElementById("addForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        // Получите значения полей формы
+        var id = 0;
+        var title = document.getElementById("addTitle").value;
+        var date = document.getElementById("addDate").value;
+        var text = document.getElementById("addText").value;
+        var picture = document.getElementById("addPicture").value;
+        // Получите значения остальных полей формы
+        // Отправить данные на сервер с помощью AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/record/save", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Закрыть модальное окно и обновить таблицу с новыми данными
+                $('#addModal').modal('hide');
+                location.reload();
+            }
+        };
+        xhr.send(`id=${id}&title=${title}&postdate=${date}&content=${text}&image=${picture}`);
+    });
+</script>
+<script>
+    function showDeleteConfirmationModal(event) {
+        const recordId = event.target.closest('div').children[0].textContent;
+        $('#deleteConfirmationModal').modal('show');
+        $('#deleteConfirmationModal').on('shown.bs.modal', function () {
+            $('#deleteConfirmationModal').find('button.btn-danger').off().on('click', function () {
+                deleteRecord(recordId);
+            });
+        });
+    }
+    function deleteRecord(recordId) {
+        $.ajax({
+            type: "DELETE",
+            url: "/record/delete/" + recordId,
+            success: function(data) {
+                // Обновляем страницу после удаления записи
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+</script>
+</body>
+</html>

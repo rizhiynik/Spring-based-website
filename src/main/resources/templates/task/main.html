@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Система для поощрения и учета дел ребенка</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <style>
+        h1, h4 {color: cadetblue; text-shadow: 1px 1px 2px black;}
+        section {background: cadetblue}
+        .social-media-icons li {
+            display: block;
+        }
+        footer {
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJNP8jyeQ0smZaHRIdo4EfdzYM-CRoe7bagQ&usqp=CAU');
+            color: #fff;
+            padding: 50px 0;
+        }
+
+        .footer-row {
+            margin-left: 200px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .footer-column {
+            width: 30%;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h4 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .social-media-icons {
+            display: flex;
+            list-style: none;
+            padding: 0;
+        }
+
+        .social-media-icons li {
+            margin-right: 10px;
+        }
+
+        .social-media-icons li a {
+            color: #fff;
+            font-size: 20px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .social-media-icons li a:hover {
+            transform: translateY(-5px);
+        }
+        #main {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="bg-image"
+     style="background: linear-gradient( rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0.5) ), url('https://i.pinimg.com/originals/93/09/e0/9309e0176514734cf5e00891ec3dad9d.jpg');
+     background-repeat: no-repeat;
+     background-size: cover;
+     background-attachment: fixed;
+     background-position: top;; height: 100vh; overflow: auto"><span style="float: left; margin: 20px 20px 20px 20px">
+            <a href="/record">
+                <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplite="off">
+                    К записям
+                </button>
+            </a>
+    </span>
+    <span style="float: right; margin: 20px 20px 20px 20px">
+        <a href="/logout">
+            <button type="button" class="btn btn-danger" data-togge="button" aria-pressed="false" autocomplete="off">
+                Выйти
+            </button>
+        </a>
+    </span>
+    <blockquote class="blockquote text-center"><h1>Задачи</h1></blockquote>
+    <div>
+        <div class="col-md-8 offset-md-4">
+            <h4>Поиск задач по любому критерию:</h4>
+            <form th:action="@{/}">
+                <input type="text" name="keyword" id="keyword" size="70" th:value="${keyword}" required/>
+                <input type="checkbox" name="title" id="title" /> <label for="title">Название</label>
+                <input type="checkbox" name="description" id="content" /> <label for="content">Описание</label>
+                <input type="checkbox" name="start_date" id="export_city" /> <label for="export_city">Дата начала</label>
+                <input type="checkbox" name="end_date" id="export_date" /> <label for="export_date">Дата выполнения</label>
+                <input type="checkbox" name="reward" id="import_city" /> <label for="import_city">Награда</label>
+                <input type="submit" class="btn btn-success btn-sm" value="Поиск"/>
+                <input type="button" class="btn btn-warning btn-sm" value="Очистить" id="btnClear" onclick="clearSearch()"/>
+            </form>
+        </div>
+    </div>
+    <section id="main">
+        <table id="1" class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th scope="col" hidden="hidden">ID задачи</th>
+                <th scope="col">Название</th>
+                <th scope="col">Описание</th>
+                <th scope="col">Дата начала</th>
+                <th scope="col">Дата выполнения</th>
+                <th scope="col">Награда</th>
+                <th scope="col">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="task: ${listTasks}">
+                <th scope="row" class="text-white" th:text="${task.id}" hidden="hidden">ID задачи отсутствует</th>
+                <th scope="row" class="text-white" th:text="${task.title}">Название отсутствует</th>
+                <th scope="row" class="text-white" th:text="${task.description}">Описание отсутствует</th>
+                <th id="export_date_extra" scope="row" class="text-white" th:text="${task.start_date}">Дата начала отсутствует</th>
+                <th scope="row" class="text-white" th:text="${task.end_date}">Дата выполнения отсутствует</th>
+                <th scope="row" class="text-white" th:text="${task.reward}">Награда отсутствует</th>
+                <td>
+                    <a class="btn btn-info" id="edit" onclick="editModal(event)">Редактировать</a>
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="showDeleteConfirmationModal(event)">
+                        Удалить
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Редактировать запись</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="editForm">
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>ID:</td>
+                                <td><input id="editId" name="id" hidden="hidden"></td>
+                            </tr>
+                            <tr>
+                                <td>Название:</td>
+                                <td><input id="editTitle" name="title"></td>
+                            </tr>
+                            <tr>
+                                <td>Описание:</td>
+                                <td><input id="editContent" name="content"></td>
+                            </tr>
+                            <tr>
+                                <td>Дата начала:</td>
+                                <td><input id="editExport_city" name="export_city" type="date"></td>
+                            </tr>
+                            <tr>
+                                <td>Дата выполнения:</td>
+                                <td><input id="editExport_date" name="export_date" type="date"></td>
+                            </tr>
+                            <tr>
+                                <td>Награда:</td>
+                                <td><input id="editImport_city" name="import_city" type="number"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addModalLabel">Добавить запись</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="addForm">
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>Название:</td>
+                                <td><input id="addTitle" name="title"></td>
+                            </tr>
+                            <tr>
+                                <td>Описание:</td>
+                                <td><input id="addContent" name="content"></td>
+                            </tr>
+                            <tr>
+                                <td>Дата начала:</td>
+                                <td><input id="addExport_city" name="export_city" type="date"></td>
+                            </tr>
+                            <tr>
+                                <td>Дата выполнения:</td>
+                                <td><input id="addExport_date" name="export_date" type="date"></td>
+                            </tr>
+                            <tr>
+                                <td>Награда:</td>
+                                <td><input id="addImport_city" name="import_city" type="number"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Удаление записи</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы действительно хотите удалить эту запись?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Выйти</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteRecord()">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="text-white">
+        <script type="text/javascript">
+            // Функция подсчета количества записей в таблице
+            function getRowsColumn() {
+                let table = document.getElementById('1')
+                let tBody = table.querySelector('tbody')
+                const count = tBody.querySelectorAll('tr').length;
+                document.write('Количество задач в таблице: ' + count)
+            }
+
+            getRowsColumn()
+        </script>
+    </p>
+    <p class="text-white">
+        <script type="text/javascript">
+            // Функция подсчета среднего количества клиентов в день
+            function getAvgClients() {
+                let table = document.getElementById('1')
+                let tBody = table.querySelector('tbody')
+                const amount_of_clients = tBody.querySelectorAll('tr').length;
+
+                const tableBody = table.querySelector('tbody'); // Получаем все записи в таблице
+                let apl_data = tableBody.querySelectorAll('#export_date_extra'); // Сохраняем только записи с датой проведения спектакля
+
+                let date_dict = {}; // Словарь для отслеживания количества завезенной техники в определенную дату
+
+                // Проходимся по всем датам в таблице, если их нет в словаре - сохраняем со значением 1, в противном случае повышаем на 1
+                for (let i = 0; i < apl_data.length; i++) {
+                    if (apl_data[i].innerHTML in date_dict) {
+                        date_dict[apl_data[i].innerHTML] = date_dict[apl_data[i].innerHTML] + 1;
+                    } else {
+                        date_dict[apl_data[i].innerHTML] = 1;
+                    }
+                }
+
+                let amount_of_days = 0;
+                for (let key in date_dict) {
+                    amount_of_days += 1;
+                }
+
+                let avg_clients = amount_of_clients / amount_of_days;
+
+                document.write('Среднее количество задач в день: ' + avg_clients)
+            }
+
+            getAvgClients()
+        </script>
+    </p>
+    <blockquote class="blockquote text-center">
+        <a class="btn btn-success" id="add" onclick="addModal()">Добавить задачу</a>
+    </blockquote>
+    <div id="chart_div1" align="center"></div>
+    <div id="chart_div2" align="center"></div>
+</div>
+<footer>
+    <div class="footer-container">
+        <div class="footer-row">
+            <div class="footer-column">
+                <h4>About Us</h4>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ullamcorper dui sed dolor bibendum, et ullamcorper lorem rutrum.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Contact Us</h4>
+                <p>1234 Main St<br>Anytown, USA 12345</p>
+                <p>Email: info@example.com<br>Phone: (123) 456-7890</p>
+            </div>
+            <div class="footer-column">
+                <h4>Follow Us</h4>
+                <ul class="social-media-icons">
+                    <li><a href="#"><img src="https://1000logos.net/wp-content/uploads/2021/04/Facebook-logo.png" alt="this slowpoke moves"  width="60" class="scale" /></a></li>
+                    <li><a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png?20220821125553" alt="this slowpoke moves"  width="40" class="scale" /></a></li>
+                    <li><a href="#"><img src="https://www.edigitalagency.com.au/wp-content/uploads/new-Instagram-logo-png-full-colour-glyph.png" alt="this slowpoke moves"  width="40" class="scale" /></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-row">
+            <p style="margin-left: 500px">&copy; 2023 My Website. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+
+    // Загружаем API для визуализации, а также пакет corechart, хранящий способы реализации различных диаграмм
+    google.charts.load('current', {'packages':['corechart']});
+
+    // Отображаем графику при загрузке страницы
+    google.charts.setOnLoadCallback(drawChart);
+
+    // Функция отображения гистограммы
+    function drawChart() {
+        const tableBody = table.querySelector('tbody'); // Получаем все записи в таблице
+        let apl_data = tableBody.querySelectorAll('#export_date_extra'); // Сохраняем только записи с датой проведения спектакля
+
+        let date_dict = {}; // Словарь для отслеживания количества завезенной техники в определенную дату
+
+        // Проходимся по всем датам в таблице, если их нет в словаре - сохраняем со значением 1, в противном случае повышаем на 1
+        for (let i = 0; i < apl_data.length; i++) {
+            if (apl_data[i].innerHTML in date_dict) {
+                date_dict[apl_data[i].innerHTML] = date_dict[apl_data[i].innerHTML] + 1;
+            } else {
+                date_dict[apl_data[i].innerHTML] = 1;
+            }
+        }
+
+        let data_arr = []; // Создаем массив для преобразования в него словаря
+
+        // Заполняем массив парами ключ-значение
+        for (let key in date_dict) {
+            data_arr.push([key, date_dict[key]]);
+        }
+
+        // Создаем таблицу, отражающую структуру гистограммы
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Даты');
+        data.addColumn('number', 'Задачи');
+        data.addRows(data_arr);
+
+        // Кастомизируем внешний вид гистограммы
+        var options = {'title':'Сколько задач начиналось каждый день',
+            'width':800,
+            'height':300};
+
+        // Отображаем гистограмму в специльно-отведенном для этого блоке
+        var chart1 = new google.visualization.BarChart(document.getElementById('chart_div1'));
+        var chart2 = new google.visualization.BarChart(document.getElementById('chart_div2'));
+        chart1.draw(data, options);
+        //chart2.draw(data, options);
+    }
+</script>
+<script type="text/javascript">
+    // Функция очистки поля поиска
+    function clearSearch() {
+        window.location = "[[@{/}]]";
+    }
+
+    // Алгоритм сортировки каждого из столбцов
+    // Запрашиваем таблицу
+    const table = document.getElementById('1');
+
+    // Получить заголовки
+    const headers = table.querySelectorAll('thead th');
+
+    // Обойти циклом все заголовки
+    [].forEach.call(headers, function(header, index) {
+        header.addEventListener('click', function() {
+            // Эта функция будет выполнять сортировку
+            sortColumn(index);
+        });
+    });
+
+    //Запросить все строки
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    const sortColumn = function(index) {
+        // Клонируем все строки
+        const newRows = Array.from(rows);
+
+        // Сортируем строки по содержимому ячеек. Массив предоставляет встроенный метод сортировки, который принимает функцию для сравнения двух элементов. Здесь две ячейки столбца сравниваются на основе их HTML-содержимого
+        newRows.sort(function(rowA, rowB) {
+            // Получаем содержимое ячеек
+            const cellA = rowA.querySelectorAll('th')[index].innerHTML;
+            const cellB = rowB.querySelectorAll('th')[index].innerHTML;
+
+            // Дополнительная проверка для дат
+            if (cellA.includes("-")) {
+                switch (true) {
+                    case Date.parse(cellA) > Date.parse(cellB): return 1;
+                    case Date.parse(cellA) < Date.parse(cellB): return -1;
+                    case Date.parse(cellA) === Date.parse(cellB): return 0;
+                }
+            } else {
+                switch (true) {
+                    case cellA > cellB: return 1;
+                    case cellA < cellB: return -1;
+                    case cellA === cellB: return 0;
+                }
+            }
+        });
+
+        // Удаляем старые строки
+        [].forEach.call(rows, function(row) {
+            tableBody.removeChild(row);
+        });
+
+        // Добавляем новую строку
+        newRows.forEach(function(newRow) {
+            tableBody.appendChild(newRow);
+        });
+    };
+</script>
+<script>
+    // Функция для отображения модального окна с данными для редактирования
+    function editModal(event) {
+        const parentRow = event.target.closest('tr');
+        const cells = parentRow.children;
+
+        document.getElementById("editId").value = cells[0].textContent;
+        document.getElementById("editTitle").value = cells[1].textContent;
+        document.getElementById("editContent").value = cells[2].textContent;
+        document.getElementById("editExport_city").value = cells[3].textContent;
+        document.getElementById("editExport_date").value = cells[4].textContent;
+        document.getElementById("editImport_city").value = cells[5].textContent;
+        // Установите значения полей в модальном окне
+        // Отображение модального окна
+        $('#editModal').modal('show');
+    }
+    // Обработчик события отправки формы редактирования
+    document.getElementById("editForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        // Получите значения полей формы
+        var id = document.getElementById("editId").value;
+        var title = document.getElementById("editTitle").value;
+        var content = document.getElementById("editContent").value;
+        var export_city = document.getElementById("editExport_city").value;
+        var export_date = document.getElementById("editExport_date").value;
+        var import_city = document.getElementById("editImport_city").value;
+
+        if (export_date < export_city) {
+            alert("Дата выполнения не может быть меньше даты начала!");
+            return false;
+        }
+        // Получите значения остальных полей формы
+        // Отправить данные на сервер с помощью AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/save", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Закрыть модальное окно и обновить таблицу с новыми данными
+                $('#editModal').modal('hide');
+                location.reload();
+            }
+        };
+        xhr.send(`id=${id}&title=${title}&description=${content}&start_date=${export_city}&end_date=${export_date}&reward=${import_city}`);
+    });
+</script>
+<script>
+    // Функция для отображения модального окна с данными для редактирования
+    function addModal() {
+        // Установите значения полей в модальном окне
+        // Отображение модального окна
+        $('#addModal').modal('show');
+    }
+    // Обработчик события отправки формы редактирования
+    document.getElementById("addForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        // Получите значения полей формы
+        var id = 0;
+        var title = document.getElementById("addTitle").value;
+        var content = document.getElementById("addContent").value;
+        var export_city = document.getElementById("addExport_city").value;
+        var export_date = document.getElementById("addExport_date").value;
+        var import_city = document.getElementById("addImport_city").value;
+
+        if (export_date < export_city) {
+            alert("Дата выполнения не может быть меньше даты начала!");
+            return false;
+        }
+        // Получите значения остальных полей формы
+        // Отправить данные на сервер с помощью AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/save", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Закрыть модальное окно и обновить таблицу с новыми данными
+                $('#addModal').modal('hide');
+                location.reload();
+            }
+        };
+        xhr.send(`id=${id}&title=${title}&description=${content}&start_date=${export_city}&end_date=${export_date}&reward=${import_city}`);
+    });
+</script>
+<script>
+    function showDeleteConfirmationModal(event) {
+        const recordId = event.target.closest('tr').children[0].textContent;
+        $('#deleteConfirmationModal').modal('show');
+        $('#deleteConfirmationModal').on('shown.bs.modal', function () {
+            $('#deleteConfirmationModal').find('button.btn-danger').off().on('click', function () {
+                deleteRecord(recordId);
+            });
+        });
+    }
+    function deleteRecord(recordId) {
+        $.ajax({
+            type: "DELETE",
+            url: "/delete/" + recordId,
+            success: function(data) {
+                // Обновляем страницу после удаления записи
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText);
+            }
+        });
+    }
+</script>
+</body>
+</html>
